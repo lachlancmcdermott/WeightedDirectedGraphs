@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace WeightedDirectedGraphs
@@ -66,7 +67,7 @@ namespace WeightedDirectedGraphs
 
         public bool AddEdge(Vertex<T> a, Vertex<T> b, float distance)
         {
-            if(a.Neighbors..Contains(b) && ) return false;
+            if(a.Neighbors.Any((edge) => edge.EndingPoint == b))
             if (a == null || b == null || Vertices.Contains(a) || Vertices.Contains(b)) return false;
 
             Edge<T> edge = new Edge<T>(a, b, distance);
@@ -76,12 +77,22 @@ namespace WeightedDirectedGraphs
 
         public bool RemoveEdge(Vertex<T> a, Vertex<T> b)
         {
-            if (a != null && b != null && b.Neighbors.Contains(a) && a.Neighbors.Contains(b))
+            if (a == null || b == null || Vertices.Contains(a) || Vertices.Contains(b)) return false;
+
+            bool found;
+            int foundIndex = 0;
+            
+            if (a.Neighbors.Find((edge) =>
             {
-                a.Neighbors.Remove(b);
-                b.Neighbors.Remove(a);
+                found = edge.EndingPoint == b;
+                if (!found) { foundIndex++; }
+                return found;
+            }) == null) return false;
+            else
+            {
+                a.Neighbors.RemoveAt(foundIndex);
+                return true;
             }
-            return false;
         }
 
         public Vertex<T> Search(T value)
