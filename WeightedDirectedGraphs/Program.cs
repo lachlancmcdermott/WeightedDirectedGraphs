@@ -4,6 +4,8 @@
     {
         static void Main(string[] args)
         {
+            Graph<int> graph = new Graph<int>();
+
                 
         }
     }
