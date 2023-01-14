@@ -9,7 +9,8 @@ namespace WeightedDirectedGraphs
 {
     public class Graph<T>
     {
-        private List<Vertex<T>> vertices;
+        private List<Vertex<T>> vertices = new List<Vertex<T>>(0);
+
         public IReadOnlyList<Vertex<T>> Vertices => vertices;
 
         public IReadOnlyList<Edge<T>> Edges
@@ -38,9 +39,29 @@ namespace WeightedDirectedGraphs
 
         public void AddVertex(Vertex<T> vertex)
         {
-            if (vertex == null || vertex.NeighborCount > 0 || vertices.Contains(vertex) == false) return;
+            if (vertex == null)
+            {
+                return;
+            }
+
+            if (vertex.Neighbors.Count > 0)
+            {
+                return;
+            }
+
             vertices.Add(vertex);
         }
+
+        //public void AddVertex(Vertex<T> vertex)
+        //{
+        //    if (vertices == null)
+        //    {
+        //        vertices.Add(vertex);
+        //        return;
+        //    }
+        //    if (vertex == null || vertex.NeighborCount > 0 || vertices.Contains(vertex) == false) return;
+        //    vertices.Add(vertex);
+        //}
 
         public bool RemoveVertex(Vertex<T> vertex)
         {
