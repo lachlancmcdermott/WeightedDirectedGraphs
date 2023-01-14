@@ -11,6 +11,13 @@
             
             graph.AddVertex(right);
             graph.AddVertex(left);
+
+            graph.AddEdge(right, left, 10);
+            //graph.RemoveEdge(right, left);
+
+            Edge<int> e = graph.GetEdge(right, left); 
+
+            Vertex<int> s = graph.Search(1);
         }
     }
 }

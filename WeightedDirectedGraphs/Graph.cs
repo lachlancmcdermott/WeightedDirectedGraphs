@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -32,73 +33,42 @@ namespace WeightedDirectedGraphs
 
         public int VertexCount => vertices.Count;
 
-        public Graph() 
+        public bool AddVertex(Vertex<T> vertex)
         {
-
-        }
-
-        public void AddVertex(Vertex<T> vertex)
-        {
-            if (vertex == null)
-            {
-                return;
-            }
-
-            if (vertex.Neighbors.Count > 0)
-            {
-                return;
-            }
-
+            if (vertex == null || vertex.Value == null || vertex.Neighbors.Count > 0) return false;
+            
             vertices.Add(vertex);
+            return true;
         }
-
-        //public void AddVertex(Vertex<T> vertex)
-        //{
-        //    if (vertices == null)
-        //    {
-        //        vertices.Add(vertex);
-        //        return;
-        //    }
-        //    if (vertex == null || vertex.NeighborCount > 0 || vertices.Contains(vertex) == false) return;
-        //    vertices.Add(vertex);
-        //}
-
         public bool RemoveVertex(Vertex<T> vertex)
         {
-            if(vertices.Contains(vertex))
+
+            for (int i = 0; i < vertices.Count; i++)
             {
-                for (int i = 0; i < vertices.Count; i++)
+                for (int k = 0; k < vertices[i].NeighborCount; k++)
                 {
-                    for (int k = 0; k < vertices[i].NeighborCount; k++)
+                    if(vertices[i].Neighbors[k].EndingPoint == vertex)
                     {
-                        if(vertices[i].Neighbors[k].EndingPoint == vertex)
-                        {
-                            vertices.Remove(vertices[i].Neighbors[k].EndingPoint);
-                        }
+                        vertices.Remove(vertices[i].Neighbors[k].EndingPoint);
                     }
                 }
-                vertices.Remove(vertex);
+                vertices.RemoveAt(i);
                 return true;
             }
-            else
-            {
-                return false;
-            }
-        }
+            return false;
 
+        }
         public bool AddEdge(Vertex<T> a, Vertex<T> b, float distance)
         {
-            if(a.Neighbors.Any((edge) => edge.EndingPoint == b))
-            if (a == null || b == null || Vertices.Contains(a) || Vertices.Contains(b)) return false;
+            if (a == null || b == null || Vertices.Contains(a) || Vertices.Contains(b) || a.Neighbors.Any((edge) => edge.EndingPoint == b)) return false;
 
             Edge<T> edge = new Edge<T>(a, b, distance);
             a.Neighbors.Add(edge); 
             return true;
         }
-
         public bool RemoveEdge(Vertex<T> a, Vertex<T> b)
         {
-            if (a == null || b == null || Vertices.Contains(a) || Vertices.Contains(b)) return false;
+            if (a == null || b == null || !vertices.Contains(a) || !vertices.Contains(b)) return false;
 
             bool found;
             int foundIndex = 0;
@@ -115,8 +85,7 @@ namespace WeightedDirectedGraphs
                 return true;
             }
         }
-
-        public Vertex<T> Search(T value)
+        public Vertex<T>? Search(T value)
         {
             int k = -1;
 
@@ -133,6 +102,16 @@ namespace WeightedDirectedGraphs
             }
             else return Vertices[k];
         }
-
+        public Edge<T>? GetEdge(Vertex<T> a, Vertex<T> b)
+        {
+            for (int i = 0; i < a.NeighborCount; i++)
+            {
+                if (a.Neighbors[i].EndingPoint.Equals(b))
+                {
+                    return a.Neighbors[i]; 
+                }
+            }
+            return null;
+        }
     }
 }
