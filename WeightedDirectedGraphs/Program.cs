@@ -5,19 +5,17 @@
         static void Main(string[] args)
         {
             Graph<int> graph = new Graph<int>();
+            Random rand = new Random(100);
 
-            Vertex<int> right = new Vertex<int>(1);
-            Vertex<int> left = new Vertex<int>(0);
-            
-            graph.AddVertex(right);
-            graph.AddVertex(left);
+            Vertex<int> A = new Vertex<int>(rand.Next(10));
+            Vertex<int> B = new Vertex<int>(rand.Next(10));
 
-            graph.AddEdge(right, left, 10);
-            //graph.RemoveEdge(right, left);
+            for (int i = 0;i < 12; i++)
+            {
+                graph.AddEdge(A, B, rand.Next(10));
+            }
 
-            Edge<int> e = graph.GetEdge(right, left); 
-
-            Vertex<int> s = graph.Search(1);
+            Queue<Vertex<int>> q = graph.BreathFirstSearch(A, B);
         }
     }
 }

@@ -1,10 +1,13 @@
-﻿using System;
+﻿ using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using WeightedDirectedGraphs;
 
 namespace WeightedDirectedGraphs
 {
@@ -36,18 +39,25 @@ namespace WeightedDirectedGraphs
         public bool AddVertex(Vertex<T> vertex)
         {
             if (vertex == null || vertex.Value == null || vertex.Neighbors.Count > 0) return false;
-            
+
             vertices.Add(vertex);
+            return true;
+        }
+        public bool AddVal(T value)
+        {
+            Vertex<T> v = new Vertex<T>(value);
+            if (v == null || v.Value == null || v.Neighbors.Count > 0) return false;
+
+            vertices.Add(v);
             return true;
         }
         public bool RemoveVertex(Vertex<T> vertex)
         {
-
             for (int i = 0; i < vertices.Count; i++)
             {
                 for (int k = 0; k < vertices[i].NeighborCount; k++)
                 {
-                    if(vertices[i].Neighbors[k].EndingPoint == vertex)
+                    if (vertices[i].Neighbors[k].EndingPoint == vertex)
                     {
                         vertices.Remove(vertices[i].Neighbors[k].EndingPoint);
                     }
@@ -63,7 +73,7 @@ namespace WeightedDirectedGraphs
             if (a == null || b == null || Vertices.Contains(a) || Vertices.Contains(b) || a.Neighbors.Any((edge) => edge.EndingPoint == b)) return false;
 
             Edge<T> edge = new Edge<T>(a, b, distance);
-            a.Neighbors.Add(edge); 
+            a.Neighbors.Add(edge);
             return true;
         }
         public bool RemoveEdge(Vertex<T> a, Vertex<T> b)
@@ -72,7 +82,7 @@ namespace WeightedDirectedGraphs
 
             bool found;
             int foundIndex = 0;
-            
+
             if (a.Neighbors.Find((edge) =>
             {
                 found = edge.EndingPoint == b;
@@ -108,10 +118,38 @@ namespace WeightedDirectedGraphs
             {
                 if (a.Neighbors[i].EndingPoint.Equals(b))
                 {
-                    return a.Neighbors[i]; 
+                    return a.Neighbors[i];
                 }
             }
             return null;
+        }
+
+        //if a repeatd value is sighted dont go back, just stop the function
+        //make parent variable in the vertex to look back up tree (use variable or dictionary)
+        public Queue<Vertex<T>> BreathFirstSearch(Vertex<T> start, Vertex<T> end)
+        {
+            Queue<Vertex<T>> path = new Queue<Vertex<T>>();
+
+            Vertex<T> temp = start;
+            int maxNumberOfNodes = temp.NeighborCount;
+            int prevNumberMax;
+            path.Enqueue(start);
+
+            while (true)
+            {
+                temp = path.Dequeue();
+                for (int k = 0; k < temp.NeighborCount; k++)
+                {
+                    if (temp.Neighbors[k].EndingPoint.Equals(end))
+                    {
+                        return path;
+                    }
+                    for (int i = 0; i < temp.NeighborCount; i++)
+                    {
+                        path.Enqueue(temp.Neighbors[i].EndingPoint);
+                    }
+                }
+            }
         }
     }
 }

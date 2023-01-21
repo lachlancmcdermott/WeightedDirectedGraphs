@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -9,6 +10,7 @@ namespace WeightedDirectedGraphs
 {
     public class Vertex<T>
     {
+        public Vertex<T> parent;
         public T Value { get; set; }
 
         private List<Edge<T>> neighbors; 
