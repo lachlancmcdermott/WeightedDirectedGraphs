@@ -10,6 +10,7 @@ namespace WeightedDirectedGraphs
 {
     public class Vertex<T>
     {
+        public bool hasVisited = false;
         public Vertex<T> parent;
         public T Value { get; set; }
 

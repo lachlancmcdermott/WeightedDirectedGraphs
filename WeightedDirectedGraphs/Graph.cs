@@ -1,6 +1,8 @@
 ﻿ using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -70,9 +72,9 @@ namespace WeightedDirectedGraphs
         }
         public bool AddEdge(Vertex<T> a, Vertex<T> b, float distance)
         {
-            if (a == null || b == null || Vertices.Contains(a) || Vertices.Contains(b) || a.Neighbors.Any((edge) => edge.EndingPoint == b)) return false;
-
             Edge<T> edge = new Edge<T>(a, b, distance);
+            if (a == null || b == null || !Vertices.Contains(a) || !Vertices.Contains(b) || a.Neighbors.Any((edge) => edge.EndingPoint == b)) return false;
+
             a.Neighbors.Add(edge);
             return true;
         }
@@ -123,32 +125,84 @@ namespace WeightedDirectedGraphs
             }
             return null;
         }
-
-        //if a repeatd value is sighted dont go back, just stop the function
-        //make parent variable in the vertex to look back up tree (use variable or dictionary)
-        public Queue<Vertex<T>> BreathFirstSearch(Vertex<T> start, Vertex<T> end)
+        public List<Vertex<T>> BreathFirstSearch(Vertex<T> start, Vertex<T> end)
         {
-            Queue<Vertex<T>> path = new Queue<Vertex<T>>();
+            Queue<Vertex<T>> queue = new Queue<Vertex<T>>();
+            Vertex<T> curr = start;
+            List<Vertex<T>> path = new List<Vertex<T>>();
 
-            Vertex<T> temp = start;
-            int maxNumberOfNodes = temp.NeighborCount;
-            int prevNumberMax;
-            path.Enqueue(start);
+            queue.Enqueue(start);
 
-            while (true)
+            do
             {
-                temp = path.Dequeue();
-                for (int k = 0; k < temp.NeighborCount; k++)
+                if(queue.Count == 0)
                 {
-                    if (temp.Neighbors[k].EndingPoint.Equals(end))
+                    return null;
+                }
+                curr = queue.Dequeue();
+                for (int i = 0; i < curr.NeighborCount; i++)
+                {
+                    if (!curr.Neighbors[i].EndingPoint.hasVisited)
                     {
-                        return path;
-                    }
-                    for (int i = 0; i < temp.NeighborCount; i++)
-                    {
-                        path.Enqueue(temp.Neighbors[i].EndingPoint);
+                        curr.Neighbors[i].EndingPoint.parent = curr;
+                        curr.Neighbors[i].EndingPoint.hasVisited = true;
+                        queue.Enqueue(curr.Neighbors[i].EndingPoint);
                     }
                 }
+            } while (curr != end);
+
+            do
+            {
+                path.Add(curr);
+                curr = curr.parent;
+            }
+            while (curr != start);
+            path.Add(curr);
+            
+            return path;
+        }
+        public List<Vertex<T>> DepthFirstSearch(Vertex<T> start, Vertex<T> end)
+        {
+            Stack<Vertex<T>> stack = new Stack<Vertex<T>>();
+            Vertex<T> curr = start;
+            stack.Push(start);
+
+            do
+            {
+                if (stack.Count == 0)
+                {
+                    return null;
+                }
+                curr = stack.Pop();
+                for (int i = 0; i < curr.NeighborCount; i++)
+                {
+                    if (!curr.Neighbors[i].EndingPoint.hasVisited)
+                    {
+                        curr.Neighbors[i].EndingPoint.parent = curr;
+                        stack.Push(curr.Neighbors[i].EndingPoint);
+                        curr.Neighbors[i].EndingPoint.hasVisited = true;
+                    }
+                }
+
+
+            } while (curr != end);
+            List<Vertex<T>> path = new List<Vertex<T>>();
+            do
+            {
+                path.Add(curr);
+                curr = curr.parent;
+            }
+            while (curr != start);
+            path.Add(curr);
+
+            return path;
+        }
+
+        public void ResetVisited(Graph<T> graph)
+        {
+            for (int i = 0; i < graph.VertexCount; i++)
+            {
+                graph.vertices[i].hasVisited = false;
             }
         }
     }

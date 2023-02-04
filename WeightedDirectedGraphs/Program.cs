@@ -1,4 +1,6 @@
-﻿namespace WeightedDirectedGraphs
+﻿using System.Runtime.CompilerServices;
+
+namespace WeightedDirectedGraphs
 {
     internal class Program
     {
@@ -7,15 +9,50 @@
             Graph<int> graph = new Graph<int>();
             Random rand = new Random(100);
 
-            Vertex<int> A = new Vertex<int>(rand.Next(10));
-            Vertex<int> B = new Vertex<int>(rand.Next(10));
+            int s = 400;
+            int y = 1600;
+            int search = 100;
 
-            for (int i = 0;i < 12; i++)
+            for (int i = 0; i < s; i++)
             {
-                graph.AddEdge(A, B, rand.Next(10));
+                graph.AddVal(i);
+            }
+#nullable disable
+            for (int i = 0; i < y; i++)
+            {
+                graph.AddEdge(graph.Search(rand.Next(s)), graph.Search(rand.Next(s)), 5);
             }
 
-            Queue<Vertex<int>> q = graph.BreathFirstSearch(A, B);
+
+            Console.WriteLine("Breath: ");
+            List<Vertex<int>> q = graph.BreathFirstSearch(graph.Search(1), graph.Search(search));
+            if (q != null)
+            {
+                for (int i = 0; i < q.Count; i++)
+                {
+                    Console.Write($"{q[i].Value}, ");
+                }
+                Console.WriteLine();
+            }
+            else
+            {
+                Console.WriteLine("no path");
+            }
+            graph.ResetVisited(graph);
+            Console.WriteLine("Depth: ");
+            List<Vertex<int>> d = graph.DepthFirstSearch(graph.Search(1), graph.Search(search));
+#nullable enable
+            if (q != null)
+            {
+                for (int i = 0; i < d.Count; i++)
+                {
+                    Console.Write($"{d[i].Value},");
+                }
+            }
+            else
+            {
+                Console.WriteLine("no path");
+            }
         }
     }
 }
