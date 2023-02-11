@@ -224,17 +224,16 @@ namespace WeightedDirectedGraphs
                 {
                     var currNeighboorVertex = curr.Neighbors[i].EndingPoint;
                     float tenativeDist = curr.Neighbors[i].Distance + curr.cumulativeDistFromStart;
-                    //float tenativeDist = curr.cumulativeDistFromStart + curr.Neighbors[i].Distance;
 
                     if (tenativeDist < curr.Neighbors[i].Distance)
                     {
+                        curr.Neighbors[i].EndingPoint.cumulativeDistFromStart = curr.cumulativeDistFromStart;
                         currNeighboorVertex.isVisited = false;
-                        curr.cumulativeDistFromStart = (curr, tenativeDist, Heuristics(heuristics, curr.Value, currNeighboorVertex.Value));
                     }
 
-                    if (queue.Contains(currNeighboorVertex) && currNeighboorVertex.isVisited == false)
+                    if (currNeighboorVertex.isVisited == false)
                     {
-                        queue.Enqueue(currNeighboorVertex);
+                        queue.Enqueue(currNeighboorVertex, currNeighboorVertex.cumulativeDistFromStart);
                     }
                 }
             } while (curr != end);
@@ -244,26 +243,9 @@ namespace WeightedDirectedGraphs
     }
 }
 
-/*
- *                 foreach (var edge in current.Neighbors)
-                {
-                    //Get the end point and tentative distance of current neighbor                    
-                    var neighbor = edge.EndingPoint;
-                    float tentative = edge.Distance + info[current].distance;
-
-                    //If we are revisiting a vertex
-                    //Check if the new tentative distance is smaller than the current tentative distance
-                    //If so update the tentative distance and set visited to false for that neighbor
-                    //By making visited false we are then allowing it to be added to the queue if it is not already in there
-                    if (tentative < info[neighbor].distance)
-                    {
-                        info[neighbor] = (current, tentative);
-                        neighbor.isVisited = false;
-                    }
-
-                    if (!queue.Contains(neighbor) && !neighbor.isVisited)
-                    {
-                        queue.Enqueue(neighbor);
-                    }
-                }
-*/
+    
+//if (tentative < curr.Neighbors[i].Distance)
+//{
+//    info[neighbor] = (current, tentative);
+//    neighbor.isVisited = false;
+//}
