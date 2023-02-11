@@ -16,9 +16,7 @@ namespace WeightedDirectedGraphs
     public class Graph<T>
     {
         private List<Vertex<T>> vertices = new List<Vertex<T>>(0);
-
         public IReadOnlyList<Vertex<T>> Vertices => vertices;
-
         public IReadOnlyList<Edge<T>> Edges
         {
             get
@@ -35,7 +33,6 @@ namespace WeightedDirectedGraphs
                 return edges;
             }
         }
-
         public int VertexCount => vertices.Count;
 
         public bool AddVertex(Vertex<T> vertex)
@@ -45,7 +42,7 @@ namespace WeightedDirectedGraphs
             vertices.Add(vertex);
             return true;
         }
-        public bool AddVal(T value)
+        public bool AddVal(int value)
         {
             Vertex<T> v = new Vertex<T>(value);
             if (v == null || v.Value == null || v.Neighbors.Count > 0) return false;
@@ -142,10 +139,10 @@ namespace WeightedDirectedGraphs
                 curr = queue.Dequeue();
                 for (int i = 0; i < curr.NeighborCount; i++)
                 {
-                    if (!curr.Neighbors[i].EndingPoint.hasVisited)
+                    if (!curr.Neighbors[i].EndingPoint.isVisited)
                     {
                         curr.Neighbors[i].EndingPoint.parent = curr;
-                        curr.Neighbors[i].EndingPoint.hasVisited = true;
+                        curr.Neighbors[i].EndingPoint.isVisited = true;
                         queue.Enqueue(curr.Neighbors[i].EndingPoint);
                     }
                 }
@@ -176,11 +173,11 @@ namespace WeightedDirectedGraphs
                 curr = stack.Pop();
                 for (int i = 0; i < curr.NeighborCount; i++)
                 {
-                    if (!curr.Neighbors[i].EndingPoint.hasVisited)
+                    if (!curr.Neighbors[i].EndingPoint.isVisited)
                     {
                         curr.Neighbors[i].EndingPoint.parent = curr;
                         stack.Push(curr.Neighbors[i].EndingPoint);
-                        curr.Neighbors[i].EndingPoint.hasVisited = true;
+                        curr.Neighbors[i].EndingPoint.isVisited = true;
                     }
                 }
 
@@ -197,13 +194,76 @@ namespace WeightedDirectedGraphs
 
             return path;
         }
-
         public void ResetVisited(Graph<T> graph)
         {
             for (int i = 0; i < graph.VertexCount; i++)
             {
-                graph.vertices[i].hasVisited = false;
+                graph.vertices[i].isVisited = false;
             }
+        }
+
+        public List<Vertex<T>> DijkstraSeach(Graph<T> graph, Vertex<T> start, Vertex<T> end)
+        {
+            PriorityQueue<Vertex<T>, int> queue = new PriorityQueue<Vertex<T>, int>();
+            for (int i = 0; i < graph.VertexCount; i++)
+            {
+                graph.vertices[i].isVisited = false;
+                graph.vertices[i].cumulativeDistFromStart = int.MaxValue;
+                graph.vertices[i].parent = null;
+            }
+            start.cumulativeDistFromStart = 0;
+            queue.Enqueue(start, start.cumulativeDistFromStart);
+            Vertex<T> curr;
+            do
+            {
+                curr = queue.Dequeue();
+                curr.isVisited = true;
+                //start
+                //foreach (var edge in current.Neighbors)
+                for (int i = 0; i < curr.NeighborCount; i++)
+                {
+                    var currNeighboorVertex = curr.Neighbors[i].EndingPoint;
+                    float tenativeDist = curr.Neighbors[i].Distance + curr.cumulativeDistFromStart;
+                    //float tenativeDist = curr.cumulativeDistFromStart + curr.Neighbors[i].Distance;
+
+                    if (tenativeDist < curr.Neighbors[i].Distance)
+                    {
+                        currNeighboorVertex.isVisited = false;
+                        curr.cumulativeDistFromStart = (curr, tenativeDist, Heuristics(heuristics, curr.Value, currNeighboorVertex.Value));
+                    }
+
+                    if (queue.Contains(currNeighboorVertex) && currNeighboorVertex.isVisited == false)
+                    {
+                        queue.Enqueue(currNeighboorVertex);
+                    }
+                }
+            } while (curr != end);
+
+            return null;
         }
     }
 }
+
+/*
+ *                 foreach (var edge in current.Neighbors)
+                {
+                    //Get the end point and tentative distance of current neighbor                    
+                    var neighbor = edge.EndingPoint;
+                    float tentative = edge.Distance + info[current].distance;
+
+                    //If we are revisiting a vertex
+                    //Check if the new tentative distance is smaller than the current tentative distance
+                    //If so update the tentative distance and set visited to false for that neighbor
+                    //By making visited false we are then allowing it to be added to the queue if it is not already in there
+                    if (tentative < info[neighbor].distance)
+                    {
+                        info[neighbor] = (current, tentative);
+                        neighbor.isVisited = false;
+                    }
+
+                    if (!queue.Contains(neighbor) && !neighbor.isVisited)
+                    {
+                        queue.Enqueue(neighbor);
+                    }
+                }
+*/

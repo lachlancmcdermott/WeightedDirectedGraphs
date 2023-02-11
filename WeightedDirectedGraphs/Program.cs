@@ -13,17 +13,19 @@ namespace WeightedDirectedGraphs
             int y = 1600;
             int search = 100;
 
+            #region graphCreation
             for (int i = 0; i < s; i++)
             {
                 graph.AddVal(i);
             }
-#nullable disable
+            #nullable disable
             for (int i = 0; i < y; i++)
             {
                 graph.AddEdge(graph.Search(rand.Next(s)), graph.Search(rand.Next(s)), 5);
             }
+            #endregion
 
-
+            #region breathSearch
             Console.WriteLine("Breath: ");
             List<Vertex<int>> q = graph.BreathFirstSearch(graph.Search(1), graph.Search(search));
             if (q != null)
@@ -39,6 +41,9 @@ namespace WeightedDirectedGraphs
                 Console.WriteLine("no path");
             }
             graph.ResetVisited(graph);
+            #endregion
+
+            #region depthSearch
             Console.WriteLine("Depth: ");
             List<Vertex<int>> d = graph.DepthFirstSearch(graph.Search(1), graph.Search(search));
 #nullable enable
@@ -48,11 +53,34 @@ namespace WeightedDirectedGraphs
                 {
                     Console.Write($"{d[i].Value},");
                 }
+                Console.WriteLine();
             }
             else
             {
                 Console.WriteLine("no path");
             }
+            graph.ResetVisited(graph);
+            #endregion
+
+            #region dijestraSearch
+
+            Console.WriteLine("Dijestra: ");
+            List<Vertex<int>> m = graph.DijkstraSeach(graph, graph.Search(1), graph.Search(search));
+            if (m != null)
+            {
+                for (int i = 0; i < m.Count; i++)
+                {
+                    Console.Write($"{m[i].Value}, ");
+                }
+                Console.WriteLine();
+            }
+            else
+            {
+                Console.WriteLine("no path");
+            }
+
+            #endregion
+
         }
     }
 }
