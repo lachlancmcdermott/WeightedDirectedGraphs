@@ -42,9 +42,9 @@ namespace WeightedDirectedGraphs
             vertices.Add(vertex);
             return true;
         }
-        public bool AddVal(int value)
+        public bool AddVal(int value, float x, float y)
         {
-            Vertex<T> v = new Vertex<T>(value);
+            Vertex<T> v = new Vertex<T>(value, x, y);
             if (v == null || v.Value == null || v.Neighbors.Count > 0) return false;
 
             vertices.Add(v);
@@ -67,8 +67,12 @@ namespace WeightedDirectedGraphs
             return false;
 
         }
-        public bool AddEdge(Vertex<T> a, Vertex<T> b, float distance)
+        public bool AddEdge(Vertex<T> a, Vertex<T> b)
         {
+            float PosX = MathF.Abs(a.x - b.x);
+            float PosY = MathF.Abs(a.y - b.y);
+            float distance = 1 * MathF.Sqrt(MathF.Pow(PosX, 2) + MathF.Pow(PosY, 2));
+
             Edge<T> edge = new Edge<T>(a, b, distance);
             if (a == null || b == null || !Vertices.Contains(a) || !Vertices.Contains(b) || a.Neighbors.Any((edge) => edge.EndingPoint == b)) return false;
 
@@ -201,25 +205,26 @@ namespace WeightedDirectedGraphs
                 graph.vertices[i].isVisited = false;
             }
         }
-
         public List<Vertex<T>> DijkstraSeach(Graph<T> graph, Vertex<T> start, Vertex<T> end)
         {
-            PriorityQueue<Vertex<T>, int> queue = new PriorityQueue<Vertex<T>, int>();
+            PriorityQueue<Vertex<T>, float> queue = new PriorityQueue<Vertex<T>, float>();
             for (int i = 0; i < graph.VertexCount; i++)
             {
                 graph.vertices[i].isVisited = false;
-                graph.vertices[i].cumulativeDistFromStart = int.MaxValue;
+                graph.vertices[i].cumulativeDistFromStart = float.MaxValue;
                 graph.vertices[i].parent = null;
             }
             start.cumulativeDistFromStart = 0;
             queue.Enqueue(start, start.cumulativeDistFromStart);
-            Vertex<T> curr;
+            Vertex<T> curr = null;
             do
             {
+                if(queue.Count == 0)
+                {
+                    return null;
+                }
                 curr = queue.Dequeue();
                 curr.isVisited = true;
-                //start
-                //foreach (var edge in current.Neighbors)
                 for (int i = 0; i < curr.NeighborCount; i++)
                 {
                     var currNeighboorVertex = curr.Neighbors[i].EndingPoint;
@@ -233,19 +238,92 @@ namespace WeightedDirectedGraphs
 
                     if (currNeighboorVertex.isVisited == false)
                     {
+                        curr.parent = currNeighboorVertex;
                         queue.Enqueue(currNeighboorVertex, currNeighboorVertex.cumulativeDistFromStart);
                     }
                 }
             } while (curr != end);
+            List<Vertex<T>> path = new List<Vertex<T>>();
+            do
+            {
+                path.Add(curr);
+                if(curr.parent == null)
+                {
+                    break;
+                }
+                curr = curr.parent;
+            }
+            while (curr != start);
+            path.Add(curr);
 
-            return null;
+            return path;
+        }
+
+        public float ManhattanHeurutics(Vertex<T> node, Vertex<T> goal)
+        {
+            float dx = Math.Abs(node.x - goal.x);
+            float dy = Math.Abs(node.y - goal.y);
+            return 1 * (dx + dy);
+        }
+
+        public List<Vertex<T>> AStarSearch(Graph<T> graph, Vertex<T> start, Vertex<T> end)
+        {
+            PriorityQueue<Vertex<T>, float> queue = new PriorityQueue<Vertex<T>, float>();
+            for (int i = 0; i < graph.VertexCount; i++)
+            {
+                graph.vertices[i].isVisited = false;
+                graph.vertices[i].cumulativeDistFromStart = int.MaxValue;
+                graph.vertices[i].finalDistance = int.MaxValue;
+                graph.vertices[i].parent = null;
+            }
+            start.cumulativeDistFromStart = 0;
+            start.finalDistance = ManhattanHeurutics(start, end);
+            queue.Enqueue(start, start.finalDistance);
+            Vertex<T> curr;
+            do
+            {
+                if (queue.Count == 0)
+                {
+                    return null;
+                }
+                curr = queue.Dequeue();
+                float currFinalDist = ManhattanHeurutics(curr, end);
+
+                curr.isVisited = true;
+                for (int i = 0; i < curr.NeighborCount; i++)
+                {
+                    var currNeighboorVertex = curr.Neighbors[i].EndingPoint;
+                    float tenativeDist = curr.Neighbors[i].Distance + curr.cumulativeDistFromStart;
+
+                    if (tenativeDist < curr.Neighbors[i].Distance)
+                    {
+                        curr.Neighbors[i].EndingPoint.cumulativeDistFromStart = curr.cumulativeDistFromStart;
+                        currNeighboorVertex.isVisited = false;
+                    }
+
+                    if (currNeighboorVertex.isVisited == false)
+                    {
+                        currNeighboorVertex.finalDistance = tenativeDist + ManhattanHeurutics(currNeighboorVertex, end);
+                        curr.parent = currNeighboorVertex;
+                        queue.Enqueue(currNeighboorVertex, currNeighboorVertex.cumulativeDistFromStart);
+                    }
+                }
+
+            } while (curr != end);
+            List<Vertex<T>> path = new List<Vertex<T>>();
+            do
+            {
+                path.Add(curr);
+                if (curr.parent == null)
+                {
+                    break;
+                }
+                curr = curr.parent;
+            }
+            while (curr != start);
+            path.Add(curr);
+
+            return path;
         }
     }
 }
-
-    
-//if (tentative < curr.Neighbors[i].Distance)
-//{
-//    info[neighbor] = (current, tentative);
-//    neighbor.isVisited = false;
-//}

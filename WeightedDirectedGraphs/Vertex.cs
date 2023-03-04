@@ -10,7 +10,10 @@ namespace WeightedDirectedGraphs
 {
     public class Vertex<T>
     {
-        public int cumulativeDistFromStart;
+        public float x;
+        public float y;
+        public float finalDistance;
+        public float cumulativeDistFromStart;
         public bool isVisited = false;
         public Vertex<T> parent;
         public int Value { get; set; }
@@ -22,9 +25,11 @@ namespace WeightedDirectedGraphs
         }
 
         public int NeighborCount => neighbors.Count;
-        //public int NeighBorCount { get { return neighbors.Count; } }
-        public Vertex(int value)
+
+        public Vertex(int value, float X, float Y)
         {
+            x = X;
+            y = Y;
             neighbors = new List<Edge<T>>(0);
             Value = value;
         }

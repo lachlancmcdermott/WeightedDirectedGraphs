@@ -11,17 +11,17 @@ namespace WeightedDirectedGraphs
 
             int s = 400;
             int y = 1600;
-            int search = 100;
-
+            int search = 120;
+             
             #region graphCreation
             for (int i = 0; i < s; i++)
             {
-                graph.AddVal(i);
+                graph.AddVal(i, rand.Next(s), rand.Next(s));
             }
             #nullable disable
             for (int i = 0; i < y; i++)
             {
-                graph.AddEdge(graph.Search(rand.Next(s)), graph.Search(rand.Next(s)), 5);
+                graph.AddEdge(graph.Search(rand.Next(s)), graph.Search(rand.Next(s)));
             }
             #endregion
 
@@ -64,7 +64,7 @@ namespace WeightedDirectedGraphs
 
             #region dijestraSearch
 
-            Console.WriteLine("Dijestra: ");
+            Console.WriteLine("Dijkstra: ");
             List<Vertex<int>> m = graph.DijkstraSeach(graph, graph.Search(1), graph.Search(search));
             if (m != null)
             {
@@ -78,7 +78,23 @@ namespace WeightedDirectedGraphs
             {
                 Console.WriteLine("no path");
             }
+            #endregion
 
+            #region A*
+            Console.WriteLine("A*: ");
+            List<Vertex<int>> a = graph.AStarSearch(graph, graph.Search(1), graph.Search(search));
+            if (a != null)
+            {
+                for (int i = 0; i < a.Count; i++)
+                {
+                    Console.Write($"{a[i].Value}, ");
+                }
+                Console.WriteLine();
+            }
+            else
+            {
+                Console.WriteLine("no path");
+            }
             #endregion
 
         }
