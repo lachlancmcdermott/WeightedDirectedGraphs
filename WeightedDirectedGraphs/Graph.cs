@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using System.Security.AccessControl;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -37,7 +38,7 @@ namespace WeightedDirectedGraphs
 
         public bool AddVertex(Vertex<T> vertex)
         {
-            if (vertex == null || vertex.Value == null || vertex.Neighbors.Count > 0) return false;
+            if (vertex == null || vertex.Neighbors.Count > 0) return false;
 
             vertices.Add(vertex);
             return true;
@@ -45,14 +46,14 @@ namespace WeightedDirectedGraphs
         public bool AddVal(int value, float x, float y)
         {
             Vertex<T> v = new Vertex<T>(value, x, y);
-            if (v == null || v.Value == null || v.Neighbors.Count > 0) return false;
+            if (v == null || v.Neighbors.Count > 0) return false;
 
             vertices.Add(v);
             return true;
         }
         public bool RemoveVertex(Vertex<T> vertex)
         {
-            for (int i = 0; i < vertices.Count; i++)
+            for (int i = 0; i < vertices.Count;)
             {
                 for (int k = 0; k < vertices[i].NeighborCount; k++)
                 {
@@ -128,6 +129,7 @@ namespace WeightedDirectedGraphs
         }
         public List<Vertex<T>> BreathFirstSearch(Vertex<T> start, Vertex<T> end)
         {
+            #nullable disable
             Queue<Vertex<T>> queue = new Queue<Vertex<T>>();
             Vertex<T> curr = start;
             List<Vertex<T>> path = new List<Vertex<T>>();
@@ -164,6 +166,7 @@ namespace WeightedDirectedGraphs
         }
         public List<Vertex<T>> DepthFirstSearch(Vertex<T> start, Vertex<T> end)
         {
+            #nullable disable
             Stack<Vertex<T>> stack = new Stack<Vertex<T>>();
             Vertex<T> curr = start;
             stack.Push(start);
@@ -207,6 +210,7 @@ namespace WeightedDirectedGraphs
         }
         public List<Vertex<T>> DijkstraSeach(Graph<T> graph, Vertex<T> start, Vertex<T> end)
         {
+            #nullable disable
             PriorityQueue<Vertex<T>, float> queue = new PriorityQueue<Vertex<T>, float>();
             for (int i = 0; i < graph.VertexCount; i++)
             {
@@ -258,14 +262,12 @@ namespace WeightedDirectedGraphs
 
             return path;
         }
-
         public float ManhattanHeurutics(Vertex<T> node, Vertex<T> goal)
         {
             float dx = Math.Abs(node.x - goal.x);
             float dy = Math.Abs(node.y - goal.y);
             return 1 * (dx + dy);
         }
-
         public List<Vertex<T>> AStarSearch(Graph<T> graph, Vertex<T> start, Vertex<T> end)
         {
             PriorityQueue<Vertex<T>, float> queue = new PriorityQueue<Vertex<T>, float>();
@@ -306,6 +308,95 @@ namespace WeightedDirectedGraphs
                         currNeighboorVertex.finalDistance = tenativeDist + ManhattanHeurutics(currNeighboorVertex, end);
                         curr.parent = currNeighboorVertex;
                         queue.Enqueue(currNeighboorVertex, currNeighboorVertex.cumulativeDistFromStart);
+                    }
+                }
+
+            } while (curr != end);
+            List<Vertex<T>> path = new List<Vertex<T>>();
+            do
+            {
+                path.Add(curr);
+                if (curr.parent == null)
+                {
+                    break;
+                }
+                curr = curr.parent;
+            }
+            while (curr != start);
+            path.Add(curr);
+
+            return path;
+        }
+        public List<Vertex<T>> BellmanFord(Graph<T> graph, Vertex<T> start, Vertex<T> end)
+        {
+            PriorityQueue<Vertex<T>, float> queue = new PriorityQueue<Vertex<T>, float>();
+            for (int i = 0; i < graph.VertexCount; i++)
+            {
+                graph.vertices[i].isVisited = false;
+                graph.vertices[i].cumulativeDistFromStart = float.MaxValue;
+                graph.vertices[i].parent = null;
+            }
+            start.cumulativeDistFromStart = 0;
+            queue.Enqueue(start, start.cumulativeDistFromStart);
+            #nullable disable
+            Vertex<T> curr = null;
+            do
+            {
+                if (queue.Count == 0)
+                {
+                    return null;
+                }
+                curr = queue.Dequeue();
+                curr.isVisited = true;
+
+                for (int i = 0; i < curr.NeighborCount; i++)
+                {
+                    var currNeighboorVertex = curr.Neighbors[i].EndingPoint;
+                    float tenativeDist = curr.Neighbors[i].Distance + curr.cumulativeDistFromStart;
+
+                    if (tenativeDist < curr.Neighbors[i].Distance)
+                    {
+                        curr.Neighbors[i].EndingPoint.cumulativeDistFromStart = curr.cumulativeDistFromStart;
+                        currNeighboorVertex.isVisited = false;
+                    }
+
+                    if (currNeighboorVertex.isVisited == false)
+                    {
+                        curr.parent = currNeighboorVertex;
+                        queue.Enqueue(currNeighboorVertex, currNeighboorVertex.cumulativeDistFromStart);
+                    }
+                }
+                //looping thru vertices first time
+                for (int i = 0; i < graph.vertices.Count; i++)
+                {
+                    for (int k = 0; k < graph.Edges.Count; k++)
+                    {
+                        Vertex<T> q = Edges[k].StartingPoint;
+                        Vertex<T> e = Edges[k].EndingPoint;
+                        float weight = Edges[k].Distance;
+                        float endTenativeDist = e.Neighbors[i].Distance + weight;
+
+                        if (e.cumulativeDistFromStart < endTenativeDist)
+                        {
+                            e.cumulativeDistFromStart = endTenativeDist;
+                        }
+                    }
+                }
+                //looping thru vertices a second time
+                for (int i = 0; i < graph.vertices.Count; i++)
+                {
+                    for (int k = 0; k < graph.Edges.Count; k++)
+                    {
+                        Vertex<T> q = Edges[k].StartingPoint;
+                        Vertex<T> e = Edges[k].EndingPoint;
+                        float weight = Edges[k].Distance;
+                        float endTenativeDist = e.Neighbors[i].Distance + weight;
+
+                        if (e.cumulativeDistFromStart > endTenativeDist)
+                        {
+                            Exception NegCycle = new Exception("Negative cycle");
+                            throw NegCycle;
+                        }
                     }
                 }
 

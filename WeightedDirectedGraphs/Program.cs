@@ -97,6 +97,28 @@ namespace WeightedDirectedGraphs
             }
             #endregion
 
+            #region BellmanFord
+            Console.WriteLine("Bellman Ford: ");
+            List<Vertex<int>> b = graph.BellmanFord(graph, graph.Search(1), graph.Search(search));
+            if (b != null)
+            {
+                for (int i = 0; i < b.Count; i++)
+                {
+                    Console.Write($"{b[i].Value}, ");
+                }
+                Console.WriteLine();
+            }
+            if(b == null)
+            {
+                Console.WriteLine("No path");
+            }
+            else
+            {
+                Console.WriteLine("Found negative cycle");
+            }
+
+            #endregion
+
         }
     }
 }

@@ -25,7 +25,8 @@ namespace WeightedDirectedGraphs
         }
 
         public int NeighborCount => neighbors.Count;
-
+        
+        #nullable disable
         public Vertex(int value, float X, float Y)
         {
             x = X;
