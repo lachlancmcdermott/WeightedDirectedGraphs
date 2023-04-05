@@ -333,9 +333,8 @@ namespace WeightedDirectedGraphs
 
             return path;
         }
-        public List<Vertex<T>> BellmanFord(Graph<T> graph)
+        public List<Vertex<T>> BellmanFord(Graph<T> graph, Vertex<T> start)
         {
-            
             Queue<Vertex<T>> queue = new Queue<Vertex<T>>();
             for (int i = 0; i < vertices.Count; i++)
             {
@@ -351,32 +350,26 @@ namespace WeightedDirectedGraphs
             Vertex<T> curr = null;
             do
             {
-                if (queue.Count == 0)
-                {
-                    return null;
-                }
                 curr = queue.Dequeue();
                 curr.isVisited = true;
-                for (int i = 0; i < graph.vertices.Count; i++)
-                { 
-                    curr = graph.vertices[i];
-                    for (int k = 0; k < curr.NeighborCount; k++)
-                    {   
-                        float tenativeDist = curr.cumulativeDistFromStart + curr.Neighbors[k].Distance;
-                        if (curr.cumulativeDistFromStart > tenativeDist)
-                        {
-                            curr.cumulativeDistFromStart = tenativeDist;
-                            curr.Neighbors[i].StartingPoint.parent = curr;
-                        }
+                curr.cumulativeDistFromStart = 0;
+                for (int k = 0; k < curr.NeighborCount; k++)
+                {   
+                    float tenativeDist = curr.cumulativeDistFromStart + curr.Neighbors[k].Distance;
+                    if (curr.cumulativeDistFromStart > tenativeDist)
+                    {
+                        curr.cumulativeDistFromStart = tenativeDist;
+                        curr.Neighbors[k].StartingPoint.parent = curr;
                     }
                 }
+
                 for (int i = 0; i < graph.vertices.Count - 1; i++)
                 {
                     curr = graph.vertices[i];
                     for (int k = 0; k < curr.NeighborCount; k++)
                     {
                         float tenativeDist = curr.cumulativeDistFromStart + curr.Neighbors[k].Distance;
-                        if (curr.cumulativeDistFromStart > tenativeDist)
+                        if (curr.Neighbors[k].EndingPoint.cumulativeDistFromStart > tenativeDist)
                         {
                             Exception NegCycle = new Exception("Negative cycle");
                             throw NegCycle;
@@ -384,7 +377,7 @@ namespace WeightedDirectedGraphs
                     }
                 }
 
-            } while (curr != end);
+            } while (queue.Count > 0);
             return null;
         }
     }

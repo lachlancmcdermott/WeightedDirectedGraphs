@@ -14,21 +14,21 @@ namespace WeightedDirectedGraphs
             int search = 120;
 
             #nullable disable
-            graph.AddVal(1, 1, 1);
-            graph.AddVal(0, 0, 0);
-            graph.AddEdge(graph.Search(1), graph.Search(0), 0);
-            graph.AddEdge(graph.Search(0), graph.Search(1),-40);
+            //graph.AddVal(1, 1, 1);
+            //graph.AddVal(0, 0, 0);
+            //graph.AddEdge(graph.Search(1), graph.Search(0), 0);
+            //graph.AddEdge(graph.Search(0), graph.Search(1),-40);
 
             #region graphCreation
-            //for (int i = 0; i < s; i++)
-            //{
-            //    graph.AddVal(i, rand.Next(s), rand.Next(s));
-            //}
-            //#nullable disable
-            //for (int i = 0; i < y; i++)
-            //{
-            //    graph.AddEdge(graph.Search(rand.Next(s)), graph.Search(rand.Next(s)));
-            //}
+            for (int i = 0; i < s; i++)
+            {
+                graph.AddVal(i, rand.Next(s), rand.Next(s));
+            }
+#nullable disable
+            for (int i = 0; i < y; i++)
+            {
+                graph.AddEdge(graph.Search(rand.Next(s)), graph.Search(rand.Next(s)), rand.Next(s));
+            }
             #endregion
 
             #region breathSearch
@@ -105,7 +105,7 @@ namespace WeightedDirectedGraphs
 
             #region BellmanFord
             Console.WriteLine("Bellman Ford: ");
-            List<Vertex<int>> b = graph.BellmanFord(graph, graph.Search(1), graph.Search(search));
+            List<Vertex<int>> b = graph.BellmanFord(graph, graph.Search(1));
             if(b == null)
             {
                 Console.WriteLine("No negative cycles");
